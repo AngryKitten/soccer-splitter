@@ -70,12 +70,15 @@ function generateGroups(teamName) {
   const groups = [[], [], [], [], [], []];
   const docRef = document.getElementById('player-groups');
   for (let i = 0; i < 6; i++) {
-    docRef.innerHTML += `<div>Group ${i + 1}</div>`;
+    docRef.innerHTML += `<div class="group-header">Group ${i + 1}</div>`;
+    let htmlBuilder = '<ol class="group-players">';
     for (let j = 0; j < playersOnField; j++) {
       const computatedIndex = (i * playersOnField) + j;
-      docRef.innerHTML += `<div>${parsedTeamList[teamName].players[randomizedPlayers[computatedIndex]]}</div>`;
+      htmlBuilder += `<li class="group-player">${parsedTeamList[teamName].players[randomizedPlayers[computatedIndex]]}</li>`;
       groups[i].push(randomizedPlayers[computatedIndex]);
     }
+    htmlBuilder += '</ol>';
+    docRef.innerHTML += htmlBuilder;
   }
   const numOutliers = randomizedPlayers.length - (playersOnField * 6);
   console.log('number of outliers: ' + numOutliers);
