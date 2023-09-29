@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Soccer Splitter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="main.css">
+  </head>
+  <body>
+    <div id="player-amount">
+      Enter team name and number of players:
+      <div><input id="team-name" placeholder="Team Name" type="text"></div>
+      <div><input id="player-amount-input" placeholder="Number of players" type="tel"></div>
+      <button onclick="generatePlayerEntry()">Next -></button>
+      <div id="existing-teams"></div>
+    </div>
+    <div id="player-names" class="hidden">
+      Enter player names:
+    </div>
+    <div id="player-selection" class="hidden">
+      Select players available and number on field:
+    </div>
+    <div id="player-groups" class="hidden"></div>
+    <script src="main.js" type="text/javascript"></script>
+  </body>
+</html>
