@@ -1,5 +1,51 @@
+:root {
+  --body-copy: black;
+  --contrast: #208aae;
+  --background: lightgrey;
+  --type-b: #60492c;
+  --type-c: firebrick;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--body-copy);
+}
+
+input {
+  background-color: var(--background);
+  border-color: var(--type-c);
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 8px;
+  padding: 8px;
+}
+
+button {
+  background-color: var(--type-c);
+  border-color: var(--type-b);
+  border-radius: 8px;
+  color: var(--background);
+  font-size: 14px;
+  padding: 4px;
+}
+
+input[type=checkbox] {
+  height: 32px;
+  width: 32px;
+}
+
+label {
+  font-size: 18px;
+  font-weight: bold;
+  margin-left: 8px;
+}
+
 .hidden {
   display: none;
+}
+
+.align-right {
+  text-align: right;
 }
 
 .team-selection {
@@ -8,8 +54,21 @@
   justify-content: space-between;
 }
 
-.delete-button {
+.team-button {
   margin-left: 32px;
+}
+
+.edit-row {
+  align-items: center;
+  display: flex;
+  font-size: 18px;
+  font-weight: bold;
+  justify-content: space-between;
+}
+
+.checkbox-container {
+  align-items: center;
+  display: flex;
 }
 
 .group-header {

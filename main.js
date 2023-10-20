@@ -19,33 +19,66 @@ const rotations = 6;
   const teamList = localStorage.getItem('teams');
   if (teamList !== null) {
     parsedTeamList = JSON.parse(teamList);
-    document.getElementById('existing-teams').innerHTML = '<div>Or select an existing team:</div>';
-    Object.keys(parsedTeamList).forEach(teamName => {
-      document.getElementById('existing-teams').innerHTML += `<div class="team-selection">
-        <button onclick="generatePlayerSelection('${teamName}')">${teamName}</button><button class="delete-button" onclick="deleteTeam('${teamName}')">DELETE ${teamName} (THERE'S NO GOING BACK FROM THIS)</button>
-      </div>`;
-    });
+    buildTeamList();
   }
 })();
 
-function deleteTeam(teamName) {
-  delete parsedTeamList[teamName];
-  localStorage.setItem('teams', JSON.stringify(parsedTeamList));
-  document.getElementById('existing-teams').innerHTML = '<div>Or select an existing team:</div>';
+function buildTeamList() {
+  document.getElementById('existing-teams').innerHTML = '<h3>Or select an existing team:</h3>';
   Object.keys(parsedTeamList).forEach(teamName => {
     document.getElementById('existing-teams').innerHTML += `<div class="team-selection">
-      <button onclick="generatePlayerSelection('${teamName}')">${teamName}</button><button class="delete-button" onclick="deleteTeam('${teamName}')">DELETE ${teamName} (THERE'S NO GOING BACK FROM THIS)</button>
+      <button onclick="generatePlayerSelection('${teamName}')">${teamName}</button>
+      <button class="team-button" onclick="editTeam('${teamName}')">Edit Team</button>
+      <button class="team-button" onclick="deleteTeam('${teamName}')">Delete Team (THERE'S NO GOING BACK FROM THIS)</button>
     </div>`;
   });
 }
 
+function deleteTeam(teamName) {
+  delete parsedTeamList[teamName];
+  localStorage.setItem('teams', JSON.stringify(parsedTeamList));
+  buildTeamList();
+}
+
+function editTeam(teamName) {
+  setSectionNotHidden('flex-container');
+  const docRef = document.getElementById('flex-container');
+  docRef.innerHTML = `<div class="edit-row">Team Name:<input id="new-team-name" placeholder="Team Name" type="text" value="${teamName}"></div><h3>Edit number of times not played:</h3>`;
+  const playersRef = parsedTeamList[teamName].players;
+  for (let i = 0; i < playersRef.length; i++) {
+    docRef.innerHTML += `<div class="edit-row">${playersRef[i].name}<input id="${i}" placeholder="Times Not Played" type="text" class="times-not-played-input" value="${playersRef[i].timesNotPlayed}"></div>`;
+  }
+  docRef.innerHTML += `<div class="align-right"><button onclick="saveTeam('${teamName}')">Save Team</button></div>`;
+}
+
+function saveTeam(teamName) {
+  newTeamName = document.getElementById('new-team-name').value;
+  team = {
+    [newTeamName]: {
+      players: [...document.getElementsByClassName('times-not-played-input')].map(input => {
+        return {
+          name: parsedTeamList[teamName].players[input.id].name,
+          timesNotPlayed: input.value
+        };
+      }),
+      games: JSON.parse(JSON.stringify(parsedTeamList[teamName].games))
+    }
+  };
+  parsedTeamList = Object.assign({}, parsedTeamList, team);
+  if (teamName !== newTeamName) {
+    delete parsedTeamList[teamName];
+  }
+  localStorage.setItem('teams', JSON.stringify(parsedTeamList));
+  setSectionNotHidden('player-amount');
+  buildTeamList();
+}
+
 function generatePlayerEntry() {
-  document.getElementById('player-amount').classList.add('hidden');
-  document.getElementById('player-names').classList.remove('hidden');
+  setSectionNotHidden('player-names');
   for (let i = 0; i < document.getElementById('player-amount-input').value; i++) {
     document.getElementById('player-names').innerHTML += '<div><input type="text" class="player-name-input"></div>';
   }
-  document.getElementById('player-names').innerHTML += '<div><button onclick="generatePlayerSelection()">Next -></button></div>';
+  document.getElementById('player-names').innerHTML += '<div><button onclick="generatePlayerSelection()">Next</button></div>';
 }
 
 function generatePlayerSelection(teamName) {
@@ -81,32 +114,28 @@ function generatePlayerSelection(teamName) {
   } else {
     team = { [teamName]: parsedTeamList[teamName] };
   }
-  document.getElementById('player-amount').classList.add('hidden');
-  document.getElementById('player-names').classList.add('hidden');
-  document.getElementById('player-selection').classList.remove('hidden');
+  setSectionNotHidden('player-selection');
   document.getElementById('player-selection').innerHTML += '<div><button onclick="selectAll()">Select All</button></div>';
   for (let i = 0; i < team[teamName].players.length; i++) {
-    document.getElementById('player-selection').innerHTML += `<div><input type="checkbox" id="player-${i}-checkbox" value="${i}" class="player-selection-checkbox"><label for="player-${i}-checkbox">${team[teamName].players[i].name}</label></div>`;
+    document.getElementById('player-selection').innerHTML += `<div class="checkbox-container"><input type="checkbox" id="player-${i}-checkbox" value="${i}" class="player-selection-checkbox"><label for="player-${i}-checkbox">${team[teamName].players[i].name}</label></div>`;
   }
-  document.getElementById('player-selection').innerHTML += '<div><input id="players-on-field" placeholder="Players on field" type="tel"></div>';
+  document.getElementById('player-selection').innerHTML += '<h3>Enter the number of players on the field at a time:</h3<div><input id="players-on-field" placeholder="Players on field" type="tel"></div>';
   document.getElementById('player-selection').innerHTML += `<div>
-    <button onclick="manuallyCreateGroups('${teamName}')">Manually Create Groups -></button>
-    <button onclick="generateGroups('${teamName}')">Randomize Groups -></button>
+    <button onclick="manuallyCreateGroups('${teamName}')">Manually Create Groups</button>
+    <button onclick="generateGroups('${teamName}')">Randomize Groups</button>
   </div>`;
 }
 
 function selectAll() {
-  [...document.querySelectorAll('.player-selection-checkbox')].forEach(checkbox => {
+  [...document.querySelectorAll('.player-selection-checkbox:not(:checked)')].forEach(checkbox => {
     checkbox.click();
   });
 }
 
 function manuallyCreateGroups(teamName) {
-  document.getElementById('player-selection').classList.add('hidden');
-  document.getElementById('player-groups').classList.remove('hidden');
+  setSectionNotHidden('player-groups');
   const playersOnField = document.getElementById('players-on-field').value;
   let playersPlaying = [...document.querySelectorAll('.player-selection-checkbox:checked')].map(checkbox => checkbox.value);
-  console.log('target player amount: ' + playersOnField * rotations);
   let optionsBuilder = '';
   playersPlaying.map(playerIndex => {
     return {
@@ -154,49 +183,19 @@ function saveGroup(teamName, playersOnField) {
   const fullPlayerList = [...document.getElementsByClassName('group-player-select')].map(playerSelect => playerSelect.value);
   const outliers = [...document.getElementsByClassName('group-outlier-select')].map(playerSelect => playerSelect.value);
   const groups = createGroupsHelper(fullPlayerList, teamName, playersOnField);
-  // const groups = [[], [], [], [], [], []];
-  // const docRef = document.getElementById('player-groups');
-  // docRef.innerHTML = '';
-  // for (let i = 0; i < rotations; i++) {
-  //   docRef.innerHTML += `<div class="group-header">Group ${i + 1}</div>`;
-  //   let htmlBuilder = '<ol class="group-players">';
-  //   for (let j = 0; j < playersOnField; j++) {
-  //     const computatedIndex = (i * playersOnField) + j;
-  //     htmlBuilder += `<li class="group-player">${parsedTeamList[teamName].players[fullPlayerList[computatedIndex]]}</li>`;
-  //     groups[i].push(fullPlayerList[computatedIndex]);
-  //   }
-  //   htmlBuilder += '</ol>';
-  //   docRef.innerHTML += htmlBuilder;
-  // }
   parsedTeamList[teamName].games.push({ groups });
   outliers.forEach(outlier => {
     parsedTeamList[teamName].players[outlier].timesNotPlayed++;
   });
-  // parsedTeamList[teamName].outliers = Array.from(new Set([...(parsedTeamList[teamName].outliers ? parsedTeamList[teamName].outliers : []), ...outliers]));
-  console.log('all saved teams: ', parsedTeamList);
   localStorage.setItem('teams', JSON.stringify(parsedTeamList));
 }
 
 function generateGroups(teamName) {
-  document.getElementById('player-selection').classList.add('hidden');
-  document.getElementById('player-groups').classList.remove('hidden');
-  const playersOnField = document.getElementById('players-on-field').value;
-  console.log('target player amount: ' + playersOnField * rotations);
-
-
-
-
-
-
-
-
-
-  const selectedPlayers = [...document.querySelectorAll('.player-selection-checkbox:checked')].map(checkbox => checkbox.value);
-  const notSelectedPlayers = [...document.querySelectorAll('.player-selection-checkbox:not(:checked)')].map(checkbox => checkbox.value);
-
+  setSectionNotHidden('player-groups');
+  
   const randomizerGroups = [];
   const highestTimesNotPlayedValue = Math.max(...parsedTeamList[teamName].players.map(player => player.timesNotPlayed));
-  const selectedPlayersGlobalSet = selectedPlayers.map(selectedPlayer => parsedTeamList[teamName].players[selectedPlayer]);
+  const selectedPlayersGlobalSet = [...document.querySelectorAll('.player-selection-checkbox:checked')].map(checkbox => checkbox.value).map(selectedPlayer => parsedTeamList[teamName].players[selectedPlayer]);
   for (let i = highestTimesNotPlayedValue; i >= 0; i--) {
     const filteredPlayersList = selectedPlayersGlobalSet.filter(selectedGlobalPlayer => selectedGlobalPlayer.timesNotPlayed === i);
     if (filteredPlayersList.length !== 0) {
@@ -204,86 +203,26 @@ function generateGroups(teamName) {
       randomizerGroups.push(filteredPlayerIndexes);
     }
   }
-  console.log('randomizer groups: ', randomizerGroups);
-
-
-  // let outliersCheckList = [];
-  // [...document.querySelectorAll('.player-selection-checkbox:checked')].map(checkbox => checkbox.value).forEach(selectedPlayer => {
-  //   const oldOutlierIndex = parsedTeamList[teamName].outliers.findIndex(oldOutlier => oldOutlier === selectedPlayer);
-  //   if (oldOutlierIndex !== -1) {
-  //     outliersCheckList.push(selectedPlayer);
-  //     parsedTeamList[teamName].outliers.splice(oldOutlierIndex, 1);
-  //   }
-  // });
 
   let randomizedPlayers = [];
   randomizerGroups.forEach(randomizerGroup => {
     randomizedPlayers = [...randomizedPlayers, ...randomize(randomizerGroup)];
   });
-  console.log(randomizedPlayers);
+  const playersOnField = document.getElementById('players-on-field').value;
   tempRandomizedPlayers = JSON.parse(JSON.stringify(randomizedPlayers));
   while (tempRandomizedPlayers.length < playersOnField * rotations) {
     tempRandomizedPlayers = [...tempRandomizedPlayers, ...randomizedPlayers];
   }
   randomizedPlayers = JSON.parse(JSON.stringify(tempRandomizedPlayers));
+
   const numOutliers = randomizedPlayers.length - (playersOnField * rotations);
-  outliers = [...randomizedPlayers.slice(randomizedPlayers.length - numOutliers, randomizedPlayers.length), ...notSelectedPlayers];
+  outliers = [...randomizedPlayers.slice(randomizedPlayers.length - numOutliers, randomizedPlayers.length), ...[...document.querySelectorAll('.player-selection-checkbox:not(:checked)')].map(checkbox => checkbox.value)];
 
-  
-  // let tempRandomizedPlayers;
-  // let outliers;
-  // let allowRandomization = false;
-  // while (!allowRandomization) {
-  //   randomizedPlayers = randomize([...document.querySelectorAll('.player-selection-checkbox:checked')].map(checkbox => checkbox.value));
-  //   tempRandomizedPlayers = JSON.parse(JSON.stringify(randomizedPlayers));
-  //   while (tempRandomizedPlayers.length < playersOnField * rotations) {
-  //     tempRandomizedPlayers = [...tempRandomizedPlayers, ...randomizedPlayers];
-  //   }
-  //   randomizedPlayers = JSON.parse(JSON.stringify(tempRandomizedPlayers));
-  //   console.log('randomization attempt: ', randomizedPlayers);
-  //   const numOutliers = randomizedPlayers.length - (playersOnField * rotations);
-  //   outliers = randomizedPlayers.slice(randomizedPlayers.length - numOutliers, randomizedPlayers.length);
-  //   for (let i = 0; i < outliers.length; i++) {
-  //     if (outliersCheckList.findIndex(oldOutlier => oldOutlier === outliers[i]) !== -1) {
-  //       allowRandomization = false;
-  //       break;
-  //     } else {
-  //       allowRandomization = true;
-  //     }
-  //   }
-  // }
-
-
-
-
-
-
-
-
-
-
-
-  console.log('randomized player indexes:', randomizedPlayers);
   const groups = createGroupsHelper(randomizedPlayers, teamName, playersOnField);
-  // const groups = [[], [], [], [], [], []];
-  // const docRef = document.getElementById('player-groups');
-  // for (let i = 0; i < rotations; i++) {
-  //   docRef.innerHTML += `<div class="group-header">Group ${i + 1}</div>`;
-  //   let htmlBuilder = '<ol class="group-players">';
-  //   for (let j = 0; j < playersOnField; j++) {
-  //     const computatedIndex = (i * playersOnField) + j;
-  //     htmlBuilder += `<li class="group-player">${parsedTeamList[teamName].players[randomizedPlayers[computatedIndex]]}</li>`;
-  //     groups[i].push(randomizedPlayers[computatedIndex]);
-  //   }
-  //   htmlBuilder += '</ol>';
-  //   docRef.innerHTML += htmlBuilder;
-  // }
   parsedTeamList[teamName].games.push({ groups });
   outliers.forEach(outlier => {
     parsedTeamList[teamName].players[outlier].timesNotPlayed++;
   });
-  // parsedTeamList[teamName].outliers = Array.from(new Set([...(parsedTeamList[teamName].outliers ? parsedTeamList[teamName].outliers : []), ...outliers]));
-  console.log('all saved teams: ', parsedTeamList);
   localStorage.setItem('teams', JSON.stringify(parsedTeamList));
 }
 
@@ -315,4 +254,14 @@ function randomize(array) {
     array[randomIndex] = temporaryValue;
   }
   return array;
+}
+
+function setSectionNotHidden(selectedId) {
+  ['player-amount', 'player-names', 'player-selection', 'flex-container', 'player-groups'].forEach(sectionId => {
+    if (sectionId !== selectedId) {
+      document.getElementById(sectionId).classList.add('hidden');
+    } else {
+      document.getElementById(sectionId).classList.remove('hidden');
+    }
+  })
 }
