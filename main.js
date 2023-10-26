@@ -58,7 +58,7 @@ function saveTeam(teamName) {
       players: [...document.getElementsByClassName('times-not-played-input')].map(input => {
         return {
           name: parsedTeamList[teamName].players[input.id].name,
-          timesNotPlayed: input.value
+          timesNotPlayed: parseInt(input.value)
         };
       }),
       games: JSON.parse(JSON.stringify(parsedTeamList[teamName].games))
@@ -185,7 +185,7 @@ function saveGroup(teamName, playersOnField) {
   const groups = createGroupsHelper(fullPlayerList, teamName, playersOnField);
   parsedTeamList[teamName].games.push({ groups });
   outliers.forEach(outlier => {
-    parsedTeamList[teamName].players[outlier].timesNotPlayed++;
+    parsedTeamList[teamName].players[outlier].timesNotPlayed = parseInt(parsedTeamList[teamName].players[outlier].timesNotPlayed) + 1;
   });
   localStorage.setItem('teams', JSON.stringify(parsedTeamList));
 }
@@ -197,7 +197,7 @@ function generateGroups(teamName) {
   const highestTimesNotPlayedValue = Math.max(...parsedTeamList[teamName].players.map(player => player.timesNotPlayed));
   const selectedPlayersGlobalSet = [...document.querySelectorAll('.player-selection-checkbox:checked')].map(checkbox => checkbox.value).map(selectedPlayer => parsedTeamList[teamName].players[selectedPlayer]);
   for (let i = highestTimesNotPlayedValue; i >= 0; i--) {
-    const filteredPlayersList = selectedPlayersGlobalSet.filter(selectedGlobalPlayer => selectedGlobalPlayer.timesNotPlayed === i);
+    const filteredPlayersList = selectedPlayersGlobalSet.filter(selectedGlobalPlayer => parseInt(selectedGlobalPlayer.timesNotPlayed) === i);
     if (filteredPlayersList.length !== 0) {
       let filteredPlayerIndexes = filteredPlayersList.map(filteredPlayer => parsedTeamList[teamName].players.findIndex(player => player.name === filteredPlayer.name));
       randomizerGroups.push(filteredPlayerIndexes);
@@ -221,7 +221,7 @@ function generateGroups(teamName) {
   const groups = createGroupsHelper(randomizedPlayers, teamName, playersOnField);
   parsedTeamList[teamName].games.push({ groups });
   outliers.forEach(outlier => {
-    parsedTeamList[teamName].players[outlier].timesNotPlayed++;
+    parsedTeamList[teamName].players[outlier].timesNotPlayed = parseInt(parsedTeamList[teamName].players[outlier].timesNotPlayed) + 1;
   });
   localStorage.setItem('teams', JSON.stringify(parsedTeamList));
 }
@@ -231,6 +231,9 @@ function createGroupsHelper(playerList, teamName, playersOnField) {
   const docRef = document.getElementById('player-groups');
   docRef.innerHTML = '';
   for (let i = 0; i < rotations; i++) {
+    if (i === 3) {
+      docRef.innerHTML += '<div class="halftime-splitter">-- Half-Time --</div>';
+    }
     docRef.innerHTML += `<div class="group-header">Group ${i + 1}</div>`;
     let htmlBuilder = '<ol class="group-players">';
     for (let j = 0; j < playersOnField; j++) {

@@ -71,16 +71,29 @@ label {
   display: flex;
 }
 
-.group-header {
-  font-size: 20px;
+#player-groups {
+  font-size: 24px;
   font-weight: bold;
-  margin: 0 16px 8px;
+}
+
+.halftime-splitter {
+  font-size: 32px;
+  margin: 32px;
+  text-align: center;
+}
+
+.group-header {
+  background-color: var(--type-c);
+  border-top-right-radius: 8px;
+  border-top-left-radius: 8px;
+  color: var(--background);
+  padding: 8px;
 }
 
 .group-players {
-  background-color: lightgrey;
-  border-radius: 8px;
-  font-size: 24px;
+  background-color: var(--contrast);
+  border-bottom-right-radius: 8px;
+  border-bottom-left-radius: 8px;
   margin: 0 0 16px;
 }
 
