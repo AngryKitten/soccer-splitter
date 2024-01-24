@@ -11,22 +11,40 @@ body {
   color: var(--body-copy);
 }
 
+#main {
+  margin: 0 auto;
+  max-width: 720px;
+}
+
 input {
   background-color: var(--background);
   border-color: var(--type-c);
   border-radius: 8px;
-  font-size: 14px;
+  box-sizing: border-box;
+  font-size: 24px;
   margin-bottom: 8px;
   padding: 8px;
+  width: 100%;
 }
 
 button {
   background-color: var(--type-c);
   border-color: var(--type-b);
   border-radius: 8px;
+  box-sizing: border-box;
   color: var(--background);
-  font-size: 14px;
-  padding: 4px;
+  font-size: 24px;
+  height: 48px;
+  padding: 8px;
+  width: 100%;
+}
+
+button.half {
+  width: calc(50% - 6px);
+}
+
+button.half:first-child {
+  margin-right: 8px;
 }
 
 input[type=checkbox] {
@@ -48,14 +66,43 @@ label {
   text-align: right;
 }
 
-.team-selection {
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
+.margin-top {
+  margin-top: 8px;
 }
 
-.team-button {
-  margin-left: 32px;
+.margin-bottom {
+  margin-bottom: 8px;
+}
+
+.back-button {
+  margin-bottom: 8px;
+  width: 100px;
+}
+
+.team-selection {
+  border-bottom: 2px solid var(--body-copy);
+  display: flex;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+}
+
+.select-team-header {
+  color: var(--type-c);
+  font-size: 32px;
+  font-weight: bold;
+  height: 48px;
+}
+
+.select-team-column {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: calc(50% - 6px);
+}
+
+.select-team-column:first-child {
+  margin-right: 8px;
 }
 
 .edit-row {
@@ -64,6 +111,14 @@ label {
   font-size: 18px;
   font-weight: bold;
   justify-content: space-between;
+}
+
+.times-not-played-name {
+  width: 40%;
+}
+
+.times-not-played-input {
+  width: 60%
 }
 
 .checkbox-container {
@@ -78,6 +133,7 @@ label {
 
 .halftime-splitter {
   font-size: 32px;
+  font-weight: bold;
   margin: 32px;
   text-align: center;
 }
@@ -87,6 +143,7 @@ label {
   border-top-right-radius: 8px;
   border-top-left-radius: 8px;
   color: var(--background);
+  font-size: 28px;
   padding: 8px;
 }
 
@@ -94,6 +151,7 @@ label {
   background-color: var(--contrast);
   border-bottom-right-radius: 8px;
   border-bottom-left-radius: 8px;
+  font-size: 24px;
   margin: 0 0 16px;
 }
 
