@@ -27,6 +27,12 @@ input {
   width: 100%;
 }
 
+.flex-container {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
 button {
   background-color: var(--type-c);
   border-color: var(--type-b);
@@ -36,15 +42,12 @@ button {
   font-size: 24px;
   height: 48px;
   padding: 8px;
+  text-align: center;
   width: 100%;
 }
 
 button.half {
   width: calc(50% - 6px);
-}
-
-button.half:first-child {
-  margin-right: 8px;
 }
 
 input[type=checkbox] {
@@ -79,11 +82,25 @@ label {
   width: 100px;
 }
 
+.import-button-container {
+  border-top: 2px solid var(--body-copy);
+  border-bottom: 2px solid var(--body-copy);
+  margin: 16px 0;
+  padding: 16px 0;
+}
+
+.import-input {
+  width: calc(100% - 10px);
+}
+
 .team-selection {
   border-bottom: 2px solid var(--body-copy);
-  display: flex;
-  margin-bottom: 16px;
+  margin: 16px 0;
   padding-bottom: 16px;
+}
+
+.team-buttons {
+  display: flex;
 }
 
 .select-team-header {
@@ -91,6 +108,7 @@ label {
   font-size: 32px;
   font-weight: bold;
   height: 48px;
+  text-align: center;
 }
 
 .select-team-column {

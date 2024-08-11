@@ -19,14 +19,14 @@ const rotations = 6;
   }
 */
 
-(function() {
+(function () {
   mainRef = document.getElementById('main');
   setBaseHtml();
 })();
 
 /*
   Sets Base HTML for initial page load and selection.
-  Options for creating a new team or selecting an existing team.
+  Options for creating a new team, importing team data, or selecting an existing team.
 */
 function setBaseHtml() {
   mainRef.innerHTML = `
@@ -35,6 +35,9 @@ function setBaseHtml() {
     <div id="new-team-step-one">
       <div><input id="player-amount-input" inputmode="numeric" placeholder="Number of players" type="tel"></div>
       <button onclick="generatePlayerEntry()">Next</button>
+      <div class="import-button-container">
+        <button class="import-button" onclick="showImportOption()">Import Team Data</button>
+      </div>
     </div>
     <div id="existing-teams"></div>`;
   const teamList = localStorage.getItem('teams');
@@ -53,11 +56,35 @@ function generatePlayerEntry() {
     mainRef.insertAdjacentHTML('beforeend', '<div><input type="text" class="player-name-input" placeholder="Player Name"></div>');
   }
   mainRef.insertAdjacentHTML('beforeend', `
-    <div>
+    <div class="flex-container">
       <button class="half" onclick="setBaseHtml()">Cancel</button>
       <button class="half" onclick="createTeam();setBaseHtml()">Create</button>
     </div>`);
   document.getElementById('new-team-step-one').remove();
+}
+
+/*
+  Provides the option to import raw team data by pasting exported team data.
+*/
+function showImportOption() {
+  mainRef.innerHTML = `
+    <button class="back-button" onclick="setBaseHtml()">Back</button>
+    <h1>Import Team Data</h1>
+    <h4>Note: if team name is identical to existing team name, existing team data will be overwritten.</h4>
+    <div><input id="import-input" placeholder="Paste raw data here..."></div>
+    <button class="margin-top" onclick="saveImportedTeam()">Import</button>`;
+}
+
+/*
+  Saves the imported raw team data as a new team or overrides the existing one.
+*/
+function saveImportedTeam() {
+  const importTeam = JSON.parse(document.getElementById('import-input').value);
+  const importTeamName = importTeam.teamName;
+  delete importTeam.teamName;
+  parsedTeamList[importTeamName] = importTeam;
+  localStorage.setItem('teams', JSON.stringify(parsedTeamList));
+  setBaseHtml();
 }
 
 /*
@@ -96,20 +123,31 @@ function createTeam() {
 function buildTeamList() {
   let teamsListHtml = '';
   Object.keys(parsedTeamList).forEach(teamName => {
-    teamsListHtml += `<div class="team-selection">
+    teamsListHtml += `
+    <div class="team-selection">
+      <div class="select-team-header">${teamName}</div>
+      <div class="team-buttons">
         <div class="select-team-column">
-          <div class="select-team-header">${teamName}</div>
+          <button onclick="activeTeamName = '${teamName}';exportTeam()">Export Team</button>
           <button class="margin-top" onclick="activeTeamName = '${teamName}';generatePlayerSelection(false)">Run Game</button>
         </div>
         <div class="select-team-column">
           <button onclick="activeTeamName = '${teamName}';editTeam()">Edit Team</button>
           <button class="margin-top" onclick="deleteTeam('${teamName}')">Delete Team</button>
         </div>
-      </div>`;
+      </div>
+    </div>`;
   });
   document.getElementById('existing-teams').innerHTML = `
     <h1>Or select an existing team:</h1>
     ${teamsListHtml}`;
+}
+
+/*
+  Shows alert which contains raw team data which can be imported.
+*/
+function exportTeam() {
+  alert(JSON.stringify(Object.assign({}, parsedTeamList[activeTeamName], { teamName: activeTeamName })));
 }
 
 /*
@@ -123,15 +161,27 @@ function generatePlayerSelection(fromInGame) {
     localStorage.setItem('teams', JSON.stringify(parsedTeamList));
   }
   let team = parsedTeamList[activeTeamName];
-  mainRef.innerHTML = '<button class="back-button" onclick="setBaseHtml()">Back</button><div class="margin-bottom"><button onclick="selectAll()">Select All</button></div>';
+  mainRef.innerHTML = `
+    <button class="back-button" onclick="setBaseHtml()">Back</button>
+    <div class="margin-bottom">
+      <button onclick="selectAll()">Select All</button>
+    </div>`;
   for (let i = 0; i < team.players.length; i++) {
-    mainRef.innerHTML += `<div class="checkbox-container"><input type="checkbox" id="player-${i}-checkbox" value="${i}" class="player-selection-checkbox"><label for="player-${i}-checkbox">${team.players[i].name}</label></div>`;
+    mainRef.innerHTML += `
+      <div class="checkbox-container">
+        <input type="checkbox" id="player-${i}-checkbox" value="${i}" class="player-selection-checkbox">
+        <label for="player-${i}-checkbox">${team.players[i].name}</label>
+      </div>`;
   }
-  mainRef.innerHTML += '<h2>Enter the number of players on the field at a time:</h2<div><input id="players-on-field" inputmode="numeric" placeholder="Players on field" type="tel"></div>';
-  mainRef.innerHTML += `<div>
-    <button class="half" onclick="manuallyCreateGroups()">Manual Groups</button>
-    <button class="half" onclick="generateGroups()">Random Groups</button>
-  </div>`;
+  mainRef.innerHTML += `
+    <h2>Enter the number of players on the field at a time:</h2>
+    <div>
+      <input id="players-on-field" inputmode="numeric" placeholder="Players on field" type="tel">
+    </div>
+    <div>
+      <button onclick="manuallyCreateGroups()">Manual Groups</button>
+      <button class="margin-top" onclick="generateGroups()">Random Groups</button>
+    </div>`;
 }
 
 /*
