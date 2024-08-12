@@ -93,6 +93,14 @@ label {
   width: calc(100% - 10px);
 }
 
+#export-data {
+  padding: 16px 0;
+}
+
+#export-data-copy {
+  display: none;
+}
+
 .team-selection {
   border-bottom: 2px solid var(--body-copy);
   margin: 16px 0;

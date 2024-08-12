@@ -3,6 +3,7 @@ let tempRef;
 let parsedTeamList = {};
 let activeTeamName;
 let preRunState;
+let tempStringForExport;
 const rotations = 6;
 
 /*
@@ -144,10 +145,22 @@ function buildTeamList() {
 }
 
 /*
-  Shows alert which contains raw team data which can be imported.
+  Shows raw team data which can be copied for import.
 */
 function exportTeam() {
-  alert(JSON.stringify(Object.assign({}, parsedTeamList[activeTeamName], { teamName: activeTeamName })));
+  tempStringForExport = JSON.stringify(Object.assign({}, parsedTeamList[activeTeamName], { teamName: activeTeamName }));
+  mainRef.innerHTML = `
+    <button class="back-button" onclick="setBaseHtml()">Back</button>
+    <div id="export-data">${tempStringForExport}</div>
+    <button id="copy-export-button" onclick="copyExportData()">Copy</button>`
+}
+
+/*
+  Copies raw team data to clipboard for easy copy + paste.
+*/
+function copyExportData() {
+  navigator.clipboard.writeText(tempStringForExport);
+  document.getElementById('copy-export-button').innerHTML = 'Copied!';
 }
 
 /*
