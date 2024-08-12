@@ -277,7 +277,11 @@ function saveGroup(playersOnField) {
 function deleteTeam(teamName) {
   if (confirm(`Are you sure you want to delete ${teamName}?`)) {
     delete parsedTeamList[teamName];
-    localStorage.setItem('teams', JSON.stringify(parsedTeamList));
+    if (Object.keys(parsedTeamList).length === 0) {
+      localStorage.removeItem('teams');
+    } else {
+      localStorage.setItem('teams', JSON.stringify(parsedTeamList));
+    }
     setBaseHtml();
   }
 }
