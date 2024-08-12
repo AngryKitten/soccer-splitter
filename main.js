@@ -15,11 +15,13 @@ const rotations = 6;
     }],
     games: [{
       groups: [[]], - Second level amount based on number of rotations.
-      created: string - Date/time created.
     }]
   }
 */
 
+/*
+  Anonymous function which runs automatically on page load to set the initial UI and hook to main content for modification.
+*/
 (function () {
   mainRef = document.getElementById('main');
   setBaseHtml();
@@ -117,6 +119,7 @@ function createTeam() {
 /*
   Creates list of existing teams and shows options.
   Options include:
+  Export Team - Allows copying of raw team data for importing elsewhere.
   Run Game - Player selection and group creation.
   Edit Team - Allows editing team name and times a player has not played.
   Delete Team - Permanently removes all data for a team.
@@ -198,7 +201,7 @@ function generatePlayerSelection(fromInGame) {
 }
 
 /*
-  Checks all unchecked boxes.
+  Checks all unchecked boxes. No option to uncheck all since it is more likely to have nearly all players than nearly none and I don't feel like coding it.
 */
 function selectAll() {
   [...document.querySelectorAll('.player-selection-checkbox:not(:checked)')].forEach(checkbox => {
@@ -221,19 +224,23 @@ function manuallyCreateGroups() {
   }).forEach(player => {
     optionsBuilder += `<option value="${player.playerIndex}">${player.playerName}`;
   });
-  mainRef.innerHTML = '';
+  let htmlBuilder = '';
   for (let i = 0; i < rotations; i++) {
-    mainRef.innerHTML += `<div class="group-header">Group ${i + 1}</div>`;
+    htmlBuilder += `<div class="group-header">Group ${i + 1}</div>`;
     for (let j = 0; j < playersOnField; j++) {
-      mainRef.innerHTML += `<div>
+      htmlBuilder += `<div>
         <select type="text" class="group-player-select">
           ${optionsBuilder}
         </select>
       </div>`;
     }
   }
-  mainRef.innerHTML += `<div class="group-header group-outlier">Outliers</div><div id="group-outliers"></div><div><button onclick="addOutlier()">Add Least Playing Player</button></div>`;
-  mainRef.innerHTML += `<div><button onclick="saveGroup(${playersOnField})">Save</button></div>`;
+  htmlBuilder += `
+    <div class="group-header group-outlier">Outliers</div>
+    <div id="group-outliers"></div>
+    <button class="margin-top" onclick="addOutlier()">Add Least Playing Player</button>
+    <button class="margin-top" onclick="saveGroup(${playersOnField})">Save</button>`;
+  mainRef.innerHTML = htmlBuilder;
 }
 
 /*
@@ -264,6 +271,8 @@ function saveGroup(playersOnField) {
   const fullPlayerList = [...document.getElementsByClassName('group-player-select')].map(playerSelect => playerSelect.value);
   const outliers = [...document.getElementsByClassName('group-outlier-select')].map(playerSelect => playerSelect.value);
   const groups = createGroupsHelper(fullPlayerList, playersOnField);
+  mainRef.insertAdjacentHTML('afterbegin', '<button class="back-button" onclick="generatePlayerSelection(true)">Back</button>');
+  preRunState = JSON.parse(JSON.stringify(parsedTeamList[activeTeamName]));
   parsedTeamList[activeTeamName].games.push({ groups });
   outliers.forEach(outlier => {
     parsedTeamList[activeTeamName].players[outlier].timesNotPlayed = parseInt(parsedTeamList[activeTeamName].players[outlier].timesNotPlayed) + 1;

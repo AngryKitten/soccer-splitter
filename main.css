@@ -170,6 +170,7 @@ label {
   border-top-left-radius: 8px;
   color: var(--background);
   font-size: 28px;
+  margin-top: 16px;
   padding: 8px;
 }
 
@@ -191,4 +192,10 @@ label {
 
 .group-player:last-child {
   padding-bottom: 16px;
+}
+
+.group-player-select {
+  font-size: 18px;
+  height: 40px;
+  width: 100%;
 }
