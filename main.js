@@ -272,6 +272,7 @@ function saveGroup(playersOnField) {
   const outliers = [...document.getElementsByClassName('group-outlier-select')].map(playerSelect => playerSelect.value);
   const groups = createGroupsHelper(fullPlayerList, playersOnField);
   mainRef.insertAdjacentHTML('afterbegin', '<button class="back-button" onclick="generatePlayerSelection(true)">Back</button>');
+  mainRef.insertAdjacentHTML('beforeend', '<button class="margin-top" onclick="setBaseHtml()">Finish Game</button>');
   preRunState = JSON.parse(JSON.stringify(parsedTeamList[activeTeamName]));
   parsedTeamList[activeTeamName].games.push({ groups });
   outliers.forEach(outlier => {
@@ -366,6 +367,7 @@ function generateGroups() {
   outliers = [...randomizedPlayers.slice(randomizedPlayers.length - numOutliers, randomizedPlayers.length), ...[...document.querySelectorAll('.player-selection-checkbox:not(:checked)')].map(checkbox => checkbox.value)];
   const groups = createGroupsHelper(randomizedPlayers, playersOnField);
   mainRef.insertAdjacentHTML('afterbegin', '<button class="back-button" onclick="generatePlayerSelection(true)">Back</button>');
+  mainRef.insertAdjacentHTML('beforeend', '<button class="margin-top" onclick="setBaseHtml()">Finish Game</button>');
   preRunState = JSON.parse(JSON.stringify(parsedTeamList[activeTeamName]));
   parsedTeamList[activeTeamName].games.push({ groups });
   outliers.forEach(outlier => {
