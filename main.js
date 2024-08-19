@@ -241,6 +241,7 @@ function manuallyCreateGroups() {
     <button class="margin-top" onclick="addOutlier()">Add Least Playing Player</button>
     <button class="margin-top" onclick="saveGroup(${playersOnField})">Save</button>`;
   mainRef.innerHTML = htmlBuilder;
+  mainRef.insertAdjacentHTML('afterbegin', '<button class="back-button" onclick="setBaseHtml()">Back</button>');
 }
 
 /*
@@ -304,7 +305,8 @@ function editTeam() {
     <div class="edit-row">
       Team Name:<input id="new-team-name" placeholder="Team Name" type="text" value="${activeTeamName}">
     </div>
-    <h2>Edit number of times not played:</h2>`;
+    <h2>Edit number of times not played:</h2>
+    <h4>These values are used by the group randomizer. If a player has played fewer times they will be pushed to the front of the line so they can play more often in future games. This value is automatically increased if a player misses a game or plays less than others in a game.</h4>`;
   const playersRef = parsedTeamList[activeTeamName].players;
   for (let i = 0; i < playersRef.length; i++) {
     mainRef.innerHTML += `<div class="edit-row">
