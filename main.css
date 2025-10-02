@@ -194,7 +194,7 @@ label {
   padding-bottom: 16px;
 }
 
-.group-player-select {
+.group-player-select, .group-outlier-select {
   font-size: 18px;
   height: 40px;
   width: 100%;

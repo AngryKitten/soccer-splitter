@@ -195,7 +195,7 @@ function generatePlayerSelection(fromInGame) {
       <input id="players-on-field" inputmode="numeric" placeholder="Players on field" type="tel">
     </div>
     <div>
-      <button onclick="manuallyCreateGroups()">Manual Groups</button>
+      <button onclick="manuallyCreateGroups(false)">Manual Groups</button>
       <button class="margin-top" onclick="generateGroups()">Random Groups</button>
     </div>`;
 }
@@ -212,9 +212,27 @@ function selectAll() {
 /*
   Builds UI for creating groups manually.
 */
-function manuallyCreateGroups() {
-  const playersOnField = document.getElementById('players-on-field').value;
-  tempRef = [...document.querySelectorAll('.player-selection-checkbox:checked')].map(checkbox => checkbox.value);
+function manuallyCreateGroups(preSelect) {
+  let tempFlatGame;
+  let playersOnField;
+  if (preSelect && !confirm('Please be aware that this is a fallback option and Times Not Played will need to be entered manually. Are you sure you want to continue?')) {
+    return;
+  } else if (preSelect) {
+    tempFlatGame = parsedTeamList[activeTeamName].games[parsedTeamList[activeTeamName].games.length - 1].groups.flat();
+    playersOnField = parsedTeamList[activeTeamName].games[parsedTeamList[activeTeamName].games.length - 1].groups[0].length;
+    tempRef = Object.keys(parsedTeamList[activeTeamName].players);
+    parsedTeamList[activeTeamName] = JSON.parse(JSON.stringify(preRunState));
+    localStorage.setItem('teams', JSON.stringify(parsedTeamList));
+  } else if (!document.getElementById('players-on-field').value) {
+    alert('You must enter the number of players on the field before you can create groups.');
+    return;
+  } else if ([...document.querySelectorAll('.player-selection-checkbox:checked')].length === 0) {
+    alert('You must select the players who will be playing before you can create groups.');
+    return;
+  } else {
+    playersOnField = document.getElementById('players-on-field').value;
+    tempRef = [...document.querySelectorAll('.player-selection-checkbox:checked')].map(checkbox => checkbox.value);
+  }
   let optionsBuilder = '';
   tempRef.map(playerIndex => {
     return {
@@ -241,6 +259,16 @@ function manuallyCreateGroups() {
     <button class="margin-top" onclick="addOutlier()">Add Least Playing Player</button>
     <button class="margin-top" onclick="saveGroup(${playersOnField})">Save</button>`;
   mainRef.innerHTML = htmlBuilder;
+  if (preSelect) {
+    const selectList = [...document.querySelectorAll('select')];
+    for (let i = 0; i < selectList.length; i++) {
+      [...selectList[i].querySelectorAll(':scope > option')].forEach(optionItem => {
+        if (optionItem.value == tempFlatGame[i]) {
+          optionItem.setAttribute('selected', 'selected');
+        }
+      });
+    }
+  }
   mainRef.insertAdjacentHTML('afterbegin', '<button class="back-button" onclick="setBaseHtml()">Back</button>');
 }
 
@@ -260,6 +288,7 @@ function addOutlier() {
   const docRef = document.getElementById('group-outliers');
   docRef.insertAdjacentHTML('beforeend', `<div>
     <select type="text" class="group-outlier-select">
+      <option value="">None</option>
       ${optionsBuilder}
     </select>
   </div>`);
@@ -272,12 +301,14 @@ function saveGroup(playersOnField) {
   const fullPlayerList = [...document.getElementsByClassName('group-player-select')].map(playerSelect => playerSelect.value);
   const outliers = [...document.getElementsByClassName('group-outlier-select')].map(playerSelect => playerSelect.value);
   const groups = createGroupsHelper(fullPlayerList, playersOnField);
-  mainRef.insertAdjacentHTML('afterbegin', '<button class="back-button" onclick="generatePlayerSelection(true)">Back</button>');
+  mainRef.insertAdjacentHTML('afterbegin', '<button class="back-button" onclick="generatePlayerSelection(true)">Back</button><button class="button" onclick="manuallyCreateGroups(true)">Switch to Manual</button>');
   mainRef.insertAdjacentHTML('beforeend', '<button class="margin-top" onclick="setBaseHtml()">Finish Game</button>');
   preRunState = JSON.parse(JSON.stringify(parsedTeamList[activeTeamName]));
   parsedTeamList[activeTeamName].games.push({ groups });
   outliers.forEach(outlier => {
-    parsedTeamList[activeTeamName].players[outlier].timesNotPlayed = parseInt(parsedTeamList[activeTeamName].players[outlier].timesNotPlayed) + 1;
+    if (outlier) {
+      parsedTeamList[activeTeamName].players[outlier].timesNotPlayed = parseInt(parsedTeamList[activeTeamName].players[outlier].timesNotPlayed) + 1;
+    }
   });
   localStorage.setItem('teams', JSON.stringify(parsedTeamList));
 }
@@ -345,6 +376,13 @@ function saveTeam() {
   Generates randomized groups.
 */
 function generateGroups() {
+  if (!document.getElementById('players-on-field').value) {
+    alert('You must enter the number of players on the field before you can create groups.');
+    return;
+  } else if ([...document.querySelectorAll('.player-selection-checkbox:checked')].length === 0) {
+    alert('You must select the players who will be playing before you can create groups.');
+    return;
+  } 
   const randomizerGroups = [];
   const highestTimesNotPlayedValue = Math.max(...parsedTeamList[activeTeamName].players.map(player => player.timesNotPlayed));
   const selectedPlayersGlobalSet = [...document.querySelectorAll('.player-selection-checkbox:checked')].map(checkbox => checkbox.value).map(selectedPlayer => parsedTeamList[activeTeamName].players[selectedPlayer]);
@@ -368,7 +406,7 @@ function generateGroups() {
   const numOutliers = randomizedPlayers.length - (playersOnField * rotations);
   outliers = [...randomizedPlayers.slice(randomizedPlayers.length - numOutliers, randomizedPlayers.length), ...[...document.querySelectorAll('.player-selection-checkbox:not(:checked)')].map(checkbox => checkbox.value)];
   const groups = createGroupsHelper(randomizedPlayers, playersOnField);
-  mainRef.insertAdjacentHTML('afterbegin', '<button class="back-button" onclick="generatePlayerSelection(true)">Back</button>');
+  mainRef.insertAdjacentHTML('afterbegin', '<button class="back-button" onclick="generatePlayerSelection(true)">Back</button><button class="button" onclick="manuallyCreateGroups(true)">Switch to Manual</button>');
   mainRef.insertAdjacentHTML('beforeend', '<button class="margin-top" onclick="setBaseHtml()">Finish Game</button>');
   preRunState = JSON.parse(JSON.stringify(parsedTeamList[activeTeamName]));
   parsedTeamList[activeTeamName].games.push({ groups });
